@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
+
 import Card from './Card';
-import CardModel from '../models/Card'
+import { firebase, firebaseListToArray } from '../utils/firebase';
 
 class Cards extends Component {
   constructor(props) {
@@ -9,23 +10,32 @@ class Cards extends Component {
     this.state = {
       cards: []
     }
+  }
 
-    CardModel.all((data) => {
-      this.setState({
-        cards: data
+  componentWillMount() {
+    firebase.database()
+      .ref('/cards')
+      .on('value', data => {
+        const cardData = firebaseListToArray(data.val());
+        console.log('Card data', cardData);
+
+        this.setState({
+          cards: cardData
+        })
       });
-    });
   }
 
   render() {
-    const cards = this.state.cards.map((obj) => {
-      return <Card key={obj._id} question={obj.question}/>;
+    const cards = this.state.cards.map(card => {
+      return <Card key={ card.id } question={ card.question } />;
     });
 
     return (
       <section id="cards" className="container-fluid">
         <div className="row">
-            {cards}
+
+          { cards }
+
         </div>
       </section>
     )
